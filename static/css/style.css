@@ -1,0 +1,26 @@
+.btn-purple {
+  background-color: #6c63ff;
+  color: white;
+  border: none;
+}
+.btn-purple:hover {
+  background-color: #5848f3;
+}
+
+.btn-soft-danger {
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+}
+.btn-soft-danger:hover {
+  background-color: #e85c5c;
+}
+
+.btn-warm {
+  background-color: #f9a826;
+  color: white;
+  border: none;
+}
+.btn-warm:hover {
+  background-color: #e19014;
+}
