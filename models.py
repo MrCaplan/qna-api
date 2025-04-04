@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, func
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, func, UniqueConstraint
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -12,6 +12,7 @@ class User(Base):
 
     questions = relationship("Question", back_populates="user")
     answers = relationship("Answer", back_populates="user")
+    likes = relationship("Like", back_populates="user", cascade="all, delete-orphan")
 
 class Question(Base):
     __tablename__ = "questions"
@@ -24,7 +25,8 @@ class Question(Base):
 
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     user = relationship("User", back_populates="questions")
-    answers = relationship("Answer", back_populates="questions")
+    answers = relationship("Answer", back_populates="question", cascade="all, delete-orphan")
+    likes = relationship("Like", back_populates="question", cascade="all, delete-orphan")
 
 class Answer(Base):
     __tablename__ = "answers"
@@ -39,4 +41,16 @@ class Answer(Base):
 
     user = relationship("User", back_populates='answers')
     question = relationship("Question", back_populates="answers")
+
+class Like(Base):
+    __tablename__ = "likes"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
+
+    user = relationship("User", back_populates="likes")
+    question = relationship("Question", back_populates="likes")
+
+    __table_args__ = (UniqueConstraint('user_id', 'question_id', name='unique_like'),)
      

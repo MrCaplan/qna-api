@@ -15,6 +15,14 @@ class User(BaseModel):
     class Config:
         orm_mode = True
 
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
 class QuestionCreate(BaseModel):
     title: str
     content: str
@@ -26,6 +34,8 @@ class Question(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime]
     user: User
+
+    likes_count: int
 
     class Config:
         orm_mode = True

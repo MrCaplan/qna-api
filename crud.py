@@ -16,11 +16,20 @@ def create_question(db: Session, question: schemas.QuestionCreate, user_id: int)
 
 # 질문 전체 조회
 def get_questions(db: Session, skip: int = 0, limit: int = 10):
-    return db.query(Question).offset(skip).limit(limit).all()
+    questions = db.query(Question).offset(skip).limit(limit).all()
+
+    for q in questions:
+        q.likes_count = len(q.likes)
+
+    return questions
 
 # 질문 단건 조회
 def get_question(db: Session, question_id: int):
-    return db.query(Question).filter(Question.id == question_id).first()
+    q = db.query(Question).filter(Question.id == question_id).first()
+    if q:
+        q.likes_count = len(q.likes)
+
+    return q
 
 # 답변 생성
 def create_answer(db: Session, answer: schemas.AnswerCreate, question_id: int, user_id: int):
