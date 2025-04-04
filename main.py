@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, APIRouter, Depends
+from fastapi import FastAPI, Request, APIRouter, Depends, Form
 from routers import questions, answers, users, likes
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.staticfiles import StaticFiles
@@ -6,6 +6,8 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Question
+from fastapi.responses import RedirectResponse
+from starlette.status import HTTP_302_FOUND
 
 app = FastAPI()
 
@@ -34,3 +36,20 @@ app.include_router(likes.router)
 def index(request: Request, db: Session = Depends(get_db)):
     questions = db.query(Question).order_by(Question.created_at.desc()).all()
     return templates.TemplateResponse("index.html", {"request": request, "questions": questions})
+
+@app.get("/questions/create")
+def question_create_form(request: Request):
+    return templates.TemplateResponse("question_create.html", {"request": request})
+
+@app.post("/questions/create")
+def question_create(
+    request: Request,
+    title: str = Form(...),
+    content: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    # 로그인 구현 전이므로 user_id 하드코딩 
+    question = Question(title=title, content=content, user_id=1)
+    db.add(question)
+    db.commit()
+    return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
