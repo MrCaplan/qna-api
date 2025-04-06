@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>내 질문 목록</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .btn-purple {
+            background-color: #8e44ad;
+            color: white;
+        }
+        .btn-purple:hover {
+            background-color: #732d91;
+        }
+        .btn-soft-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .btn-soft-danger:hover {
+            background-color: #f5c6cb;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <h2>내 질문 목록</h2>
+        <ul class="list-group">
+            {% for question in questions %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>{{ question.title }}</strong><br/>
+                    <small class="text-muted">{{ question.created_at }}</small>
+                </div>
+                <div>
+                    <a href="/questions/{{ question.id }}" class="btn btn-sm btn-purple">상세보기</a>
+                    <a href="/questions/{{ question.id }}/edit" class="btn btn-sm btn-secondary">수정</a>
+                    <form action="/questions/{{ question.id }}/delete" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-soft-danger">삭제</button>
+                    </form>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <a href="/" class="btn btn-purple mt-3">메인으로</a>
+    </div>
+</body>
+</html>
+

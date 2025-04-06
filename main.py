@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Depends, Form
+from fastapi import FastAPI, Request, Depends, Form, Path
 from routers import questions, answers, users, likes
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -11,7 +11,7 @@ from auth.hashing import Hasher
 from auth.auth import get_current_user
 
 from database import SessionLocal
-from models import Question
+from models import Question, Answer, Like
 
 app = FastAPI()
 
@@ -28,6 +28,19 @@ def get_db():
         yield db
     finally:
         db.close()
+
+@app.get("/questions/{question_id}")
+def question_detail(
+    request: Request,
+    question_id: int = Path(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    question = db.query(Question).filter(Question.id == question_id).first()
+    return templates.TemplateResponse("question_detail.html", {
+        "request": request,
+        "question": question
+    })
 
 # API 라우터 등록
 app.include_router(questions.router)
@@ -131,4 +144,61 @@ def my_page(request: Request, current_user: User = Depends(get_current_user)):
         "request": request,
         "user": current_user
     })
+
+# 내가 쓴 질문 보기
+@app.get("/my/questions")
+def my_questions(request: Request, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    questions = db.query(Question).filter(Question.user_id == current_user.id).all()
+    return templates.TemplateResponse("my_questions.html", {"request": request, "questions": questions})
+
+# 내가 쓴 답변 보기
+@app.get("/my/answers")
+def my_answers(request: Request, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    answers = db.query(Answer).filter(Answer.user_id == current_user.id).all()
+    return templates.TemplateResponse("my_answers.html", {"request": request, "answers": answers})
+
+# 질문 수정 폼
+@app.get("/questions/{question_id}/edit")
+def edit_question_form(question_id: int, request: Request, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    question = db.query(Question).filter(Question.id == question_id, Question.user_id == current_user.id).first()
+    if not question:
+        return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+    return templates.TemplateResponse("edit_question.html", {"request": request, "question": question})
+
+# 질문 수정 처리
+@app.post("/questions/{question_id}/edit")
+def update_question(question_id: int, request: Request, title: str = Form(...), content: str = Form(...), db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    question = db.query(Question).filter(Question.id == question_id, Question.user_id == current_user.id).first()
+    if question:
+        question.title = title
+        question.content = content
+        db.commit()
+    return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+
+# 질문 삭제
+@app.get("/questions/{question_id}/delete")
+def delete_question(question_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    question = db.query(Question).filter(Question.id == question_id, Question.user_id == current_user.id).first()
+    if question:
+        db.delete(question)
+        db.commit()
+    return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+
+# 답변 작성 처리
+@app.post("/questions/{question_id}/answer")
+def create_answer(question_id: int, content: str = Form(...), db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    new_answer = Answer(content=content, question_id=question_id, user_id=current_user.id)
+    db.add(new_answer)
+    db.commit()
+    return RedirectResponse(url=f"/questions/{question_id}", status_code=HTTP_302_FOUND)
+
+# 좋아요 처리
+@app.get("/questions/{question_id}/like")
+def like_question(question_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    existing_like = db.query(Like).filter(Like.user_id == current_user.id, Like.question_id == question_id).first()
+    if not existing_like:
+        new_like = Like(user_id=current_user.id, question_id=question_id)
+        db.add(new_like)
+        db.commit()
+    return RedirectResponse(url=f"/questions/{question_id}", status_code=HTTP_302_FOUND)
 

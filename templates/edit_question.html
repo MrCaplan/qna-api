@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>질문 수정</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .btn-purple {
+      background-color: #8e44ad;
+      color: white;
+    }
+    .btn-purple:hover {
+      background-color: #732d91;
+    }
+    .btn-soft-danger {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    .btn-soft-danger:hover {
+      background-color: #f5c6cb;
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <h2 class="mb-4">질문 수정</h2>
+    <form method="post" action="/questions/{{ question.id }}/edit">
+      <div class="mb-3">
+        <label for="title" class="form-label">제목</label>
+        <input type="text" class="form-control" id="title" name="title" value="{{ question.title }}" required>
+      </div>
+      <div class="mb-3">
+        <label for="content" class="form-label">내용</label>
+        <textarea class="form-control" id="content" name="content" rows="5" required>{{ question.content }}</textarea>
+      </div>
+      <button type="submit" class="btn btn-purple">수정 완료</button>
+      <a href="/" class="btn btn-soft-danger">취소</a>
+    </form>
+  </div>
+</body>
+</html>
+
