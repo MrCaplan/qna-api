@@ -176,7 +176,7 @@ def update_question(question_id: int, request: Request, title: str = Form(...), 
     return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
 
 # 질문 삭제
-@app.get("/questions/{question_id}/delete")
+@app.post("/questions/{question_id}/delete")
 def delete_question(question_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     question = db.query(Question).filter(Question.id == question_id, Question.user_id == current_user.id).first()
     if question:
