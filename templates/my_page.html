@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}내 정보{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">내 정보</h2>
+<ul class="list-group">
+  <li class="list-group-item"><strong>사용자명:</strong> {{ user.username }}</li>
+  <li class="list-group-item"><strong>이메일:</strong> {{ user.email }}</li>
+</ul>
+<a href="/" class="btn btn-purple mt-3">홈으로</a>
+{% endblock %}
+

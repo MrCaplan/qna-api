@@ -8,6 +8,7 @@ from starlette.status import HTTP_302_FOUND
 from models import User
 from auth.auth import create_access_token
 from auth.hashing import Hasher
+from auth.auth import get_current_user
 
 from database import SessionLocal
 from models import Question
@@ -114,4 +115,11 @@ def logout():
     response = RedirectResponse(url="/", status_code=302)
     response.delete_cookie("access_token")
     return response
+
+@app.get("/users/me")
+def read_my_page(request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return templates.TemplateResponse("my_page.html", {
+        "request": request,
+        "user": current_user
+    })
 
