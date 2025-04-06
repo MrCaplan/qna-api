@@ -5,6 +5,9 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from fastapi.responses import RedirectResponse
 from starlette.status import HTTP_302_FOUND
+from models import User
+from auth.auth import create_access_token
+from auth.hashing import Hasher
 
 from database import SessionLocal
 from models import Question
@@ -53,4 +56,27 @@ def save_form(
     db.add(question)
     db.commit()
     return RedirectResponse(url="/", status_code=302)
+
+@app.get("/form-login")
+def login_form(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+@app.post("/form-login")
+def login_submit(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.email == username).first()
+    if not user or not Hasher.verify_password(password, user.password_hash):
+        return templates.TemplateResponse("login.html", {
+            "request": request,
+            "error": "이메일 또는 비밀번호가 잘못되었습니다."
+        })
+
+    token = create_access_token(data={"sub": str(user.id)})
+    response = RedirectResponse(url="/", status_code=302)
+    response.set_cookie(key="access_token", value=token, httponly=True)
+    return response
 
