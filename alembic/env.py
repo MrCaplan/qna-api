@@ -8,6 +8,14 @@ from alembic import context
 import sys
 import os
 
+# ✅ 추가
+from pathlib import Path
+from dotenv import load_dotenv
+
+# ✅ .env 절대경로로 로드
+env_path = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(dotenv_path=env_path)
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
