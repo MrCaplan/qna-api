@@ -123,3 +123,12 @@ def read_my_page(request: Request, db: Session = Depends(get_db), current_user: 
         "user": current_user
     })
 
+from auth.auth import get_current_user
+
+@app.get("/my-page")
+def my_page(request: Request, current_user: User = Depends(get_current_user)):
+    return templates.TemplateResponse("my_page.html", {
+        "request": request,
+        "user": current_user
+    })
+
