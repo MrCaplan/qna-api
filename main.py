@@ -80,3 +80,38 @@ def login_submit(
     response.set_cookie(key="access_token", value=token, httponly=True)
     return response
 
+@app.get("/form-signup")
+def signup_form(request: Request):
+    return templates.TemplateResponse("signup.html", {"request": request})
+
+@app.post("/form-signup")
+def signup_submit(
+    request: Request,
+    username: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    # 이메일 중복 확인
+    user = db.query(User).filter(User.email == email).first()
+    if user:
+        return templates.TemplateResponse("signup.html", {
+            "request": request,
+            "error": "이미 존재하는 이메일입니다."
+        })
+
+    new_user = User(
+        username=username,
+        email=email,
+        password_hash=Hasher.hash_password(password)
+    )
+    db.add(new_user)
+    db.commit()
+    return RedirectResponse(url="/", status_code=302)
+
+@app.get("/logout")
+def logout():
+    response = RedirectResponse(url="/", status_code=302)
+    response.delete_cookie("access_token")
+    return response
+
